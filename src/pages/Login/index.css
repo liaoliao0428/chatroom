@@ -1,0 +1,133 @@
+.login-wrap {
+    background-color: #f1f1f1;
+    width: 100%;
+    height: 100vh;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* signin */
+.signin-wrap{
+    padding: 50px 20px;
+    background-color: white;
+    border-radius: 25px;
+    width: 70%;
+    max-width: 400px;
+}
+
+.signin-wrap span{
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.signin-wrap input{
+    width:50%;
+    min-width: 250px;
+    display:block;
+    margin: 20px auto; 
+    height: 40px; 
+    line-height:40px;
+    border: none;
+    background-color: #f1f1f1;
+    padding: 0 20px;
+    border-radius: 20px;
+    outline: 0;
+    box-sizing: border-box;
+}
+
+.signin-wrap input::placeholder {
+    color: #6f6f6f;
+}
+
+.signin-wrap button{
+    width:50%;
+    min-width: 250px;
+    display:block; 
+    margin:0 auto; 
+    height: 40px; 
+    line-height:40px;
+    border:none; 
+    background:#6a6a6a; 
+    color:#fff; 
+    border-radius:20px;
+    margin-bottom: 20px;
+    outline: 0;
+}
+
+.signin-wrap button:hover{
+    filter: brightness(.8);
+    cursor: pointer;
+}
+
+.signin-wrap a {
+    text-decoration: none;
+    color: #6f6f6f;
+}
+
+.signin-wrap a:hover {
+    color: #4b4b4b;
+}
+
+/* signup */
+.signup-wrap{
+    padding: 50px 20px;
+    background-color: white;
+    border-radius: 25px;
+    width: 70%;
+    max-width: 400px;
+}
+
+.signup-wrap span{
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.signup-wrap input{
+    width:50%;
+    min-width: 250px;
+    display:block;
+    margin: 20px auto; 
+    height: 40px; 
+    line-height:40px;
+    border: none;
+    background-color: #f1f1f1;
+    padding: 0 20px;
+    border-radius: 20px;
+    outline: 0;
+    box-sizing: border-box;
+}
+
+.signup-wrap input::placeholder {
+    color: #6f6f6f;
+}
+
+.signup-wrap button{
+    width:50%;
+    min-width: 250px;
+    display:block; 
+    margin:0 auto; 
+    height: 40px; 
+    line-height:40px;
+    border:none; 
+    background:#6a6a6a; 
+    color:#fff; 
+    border-radius:20px;
+    margin-bottom: 20px;
+    outline: 0;
+}
+
+.signup-wrap button:hover{
+    filter: brightness(.8);
+    cursor: pointer;
+}
+
+.signup-wrap a {
+    text-decoration: none;
+    color: #6f6f6f;
+}
+
+.signup-wrap a:hover {
+    color: #4b4b4b;
+}
