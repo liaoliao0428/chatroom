@@ -3,10 +3,23 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 
+// 路由套件
+import { BrowserRouter as Router , Routes , Route , Navigate } from 'react-router-dom'
+
+// pages組件
+import Login from './pages/Login';
+import ChatRoom from './pages/ChatRoom';
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <>
-      <p>聊天室</p>
+      <Router>
+        <Routes>
+          <Route path='/' element={<Navigate to='/chat' />} />
+          <Route path='/login/*' element={<Login />}/>   
+          <Route path='/chat/*' element={<ChatRoom />}/>  
+        </Routes>
+      </Router>
     </>
 );
 
