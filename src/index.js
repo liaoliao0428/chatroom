@@ -6,15 +6,18 @@ import reportWebVitals from './reportWebVitals';
 // 路由套件
 import { BrowserRouter as Router , Routes , Route , Navigate } from 'react-router-dom'
 
-// Login套件
+// pages組件
 import Login from './pages/Login';
+import ChatRoom from './pages/ChatRoom';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <>
       <Router>
         <Routes>
-          <Route path='/login/*' element={<Login />}/>     
+          <Route path='/' element={<Navigate to='/chat' />} />
+          <Route path='/login/*' element={<Login />}/>   
+          <Route path='/chat/*' element={<ChatRoom />}/>  
         </Routes>
       </Router>
     </>
