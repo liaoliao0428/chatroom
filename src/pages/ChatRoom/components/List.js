@@ -1,5 +1,8 @@
 import React from 'react';
 
+// 第三方套件
+import Cookies from 'js-cookie'
+
 // 路由組件
 import { Link , useNavigate } from 'react-router-dom'
 
@@ -12,6 +15,7 @@ const List = () => {
 
     // 登出
     const logout = () => {
+        Cookies.remove('accessToken'); // 清除accseeToken
         history('/login')
     }
 
