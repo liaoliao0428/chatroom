@@ -168,6 +168,7 @@
 /* chat-wrap */
 .chat-wrap {
     width: 80%;
+    min-width: 800px;
     height: 100%;
 }
 
