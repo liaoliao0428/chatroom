@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 // 第三方套件
 import axios from 'axios';
+import Cookies from 'js-cookie'
 
 // URL
 import { URL } from '../../../global/url'
@@ -22,7 +23,8 @@ const Signin = () => {
             'password': password
         })
 
-        if ( data ) {
+        if ( data.login ) {
+            Cookies.set('accessToken', data.accessToken)  //存
             history('/chat')
         }else{
             alert('帳號密碼錯誤')
@@ -43,7 +45,7 @@ const Signin = () => {
         <div className='signin-wrap'>
             <span>登入</span>
             <input type="text" placeholder="帳號" onChange={ changeAccount } value={ account } />
-            <input type="text" placeholder="密碼" onChange={ changePassword } value={ password } s/>
+            <input type="text" placeholder="密碼" onChange={ changePassword } value={ password } />
             <button className="login-btn" onClick={ signin }>登入</button>
             <Link to='/login/signup'>建立帳號</Link>
         </div>
