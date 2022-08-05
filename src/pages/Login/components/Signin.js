@@ -1,25 +1,50 @@
-import React from 'react';
+import { useState } from 'react';
+
+// 第三方套件
+import axios from 'axios';
+
+// URL
+import { URL } from '../../../global/url'
 
 // route
 import { Link , useNavigate } from 'react-router-dom'
 
-// axios
-import axios from 'axios';
-
 const Signin = () => {
     const history = useNavigate();
+    const [ account , setAccount ] = useState('')
+    const [ password , setPassword ] = useState('')
 
     // 登入
-    const signin = () => {
-        history('/chat')
+    const signin = async () => {
+        const url = `${URL}/login/signin`
+        const { data } = await axios.post(url , {
+            'account': account,
+            'password': password
+        })
+
+        if ( data ) {
+            history('/chat')
+        }else{
+            alert('帳號密碼錯誤')
+        }
+    }
+
+    // 改變帳號
+    const changeAccount = ( event ) => {
+        setAccount(event.target.value)
+    }
+
+    // 改變密碼
+    const changePassword = ( event ) => {
+        setPassword(event.target.value)
     }
 
     return (
         <div className='signin-wrap'>
             <span>登入</span>
-            <input type="text" placeholder="帳號" />
-            <input type="text" placeholder="密碼" />
-            <button class="login-btn" onClick={signin}>登入</button>
+            <input type="text" placeholder="帳號" onChange={ changeAccount } value={ account } />
+            <input type="text" placeholder="密碼" onChange={ changePassword } value={ password } s/>
+            <button className="login-btn" onClick={ signin }>登入</button>
             <Link to='/login/signup'>建立帳號</Link>
         </div>
     );
