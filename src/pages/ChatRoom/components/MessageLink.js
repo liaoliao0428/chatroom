@@ -1,18 +1,33 @@
-import React from 'react';
+import { useEffect } from 'react';
 
 // 路由組件
 import { Link } from 'react-router-dom'
 
-const MessageLink = () => {
+const MessageLink = ( props ) => {
+
+    let { roomId , roomName , unRead , message , updateTime } = props.messageContainer
+    
+    let readCountClass = ''
+    if (unRead == 0) {
+        readCountClass = `none`
+    }else if (unRead > 0 && unRead < 10) {
+        readCountClass = `read-count-s`
+    }else if( unRead > 10 && unRead < 1000 ){
+        readCountClass = `read-count-m`
+    }else{
+        readCountClass = `read-count-l`
+        unRead = '999+'
+    }
+
     return (
-        <Link to='/chat/roomId'>
+        <Link to={`/chat/${roomId}`} onClick={props.onClick}>
             <div className='message-preview'>
-                <span>名字</span>
-                <p>訊息訊息訊息訊訊息訊息訊息訊訊息訊息訊息訊息訊</p>
+                <span>{roomName}</span>
+                <p>{message}</p>
             </div>
             <div className='message-status'>
-                <span>20:00</span>
-                <p className='read-count-s'>3</p>
+                <span>{updateTime}</span>
+                <p className={readCountClass}>{unRead}</p>
             </div>                    
         </Link>
     );

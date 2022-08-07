@@ -5,54 +5,31 @@ import { Link , useNavigate } from 'react-router-dom'
 import axios from 'axios';
 import Cookies from 'js-cookie'
 import { v4 } from 'uuid';
-
+import { io } from 'socket.io-client'
+ 
 // URL
 import { URL } from '../../../global/url'
 
 // components
 import MessageLink from './MessageLink';
 
-const List = () => {
+const List = ( props ) => {
     const history = useNavigate();
-    const message = [1, 2, 3]
-    const [ userName , setUserName ] = useState('')
-    const [ account , setAccount ] = useState('')
+    const { userName , account } = props.user
+    const { ws , setRoomName } = props
     const [ friendId , setFriendId ] = useState('')
+    const [ messageContainer , setMessageContainer ] = useState([])
 
-    // 取得使用者資料
     useEffect(() => {
-        getUserData()
+        getMessageContainer()
     } , [])
-
-    // socket連線
-    useEffect(() => {
-        // 如果account有值 socket連線
-        if(account){
-            console.log('連線');
-        }
-    } , [ account ])
-
-    // 撈使用者訊息
-    const getUserData = async () => {
-        const accessToken = Cookies.get('accessToken')
-        const url = `${URL}/chatroom/getUserData`
-        const { data } = await axios.post(url , {} , {
-            headers: {
-                'authorization': accessToken
-            }
-        })
-
-        if( data ){
-            setUserName(data.userName)
-            setAccount(data.account)
-        }
-    }
 
     // 加入好友
     const addFriend = async () => {
         const accessToken = Cookies.get('accessToken')
-        const url = `${URL}/chatroom/addFriend`
+        const url = `${URL}/user/addFriend`
         const { data } = await axios.post(url , {
+            'userName': userName,
             'friendId': friendId
         } , {
             headers: {
@@ -62,6 +39,7 @@ const List = () => {
 
         if ( data.addFriend ) {
             setFriendId('')
+            // getMessageContainer()
         }else{
             alert(data.addFriendResponse)
         }
@@ -78,12 +56,40 @@ const List = () => {
         setFriendId(event.target.value)
     }
 
+    // 撈訊息容器
+    const getMessageContainer = async () => {
+        const accessToken = Cookies.get('accessToken')
+        const url = `${URL}/messageContainer/getMessageContainer`
+        const { data } = await axios.post(url , {} , {
+            headers: {
+                'authorization': accessToken
+            }
+        })
+
+        if ( data ) {
+            setMessageContainer(data.room)
+        }
+    }
+
+    // --------------------------------------------------- 連線 ------------------------------------------------------------------------
+    const sendMessage = () => {
+        //以 emit 送訊息，並以 getMessage 為名稱送給 server 捕捉
+        ws.emit('getMessage', '只回傳給發送訊息的 client')
+    }
+    // --------------------------------------------------- 連線 ------------------------------------------------------------------------
+
+    // 點擊溝改聊天室名稱
+    const changeRoomName = (roomName) => {
+        setRoomName(roomName)
+    }
+
     return (
         <div className='list-wrap'>
             <div className='list-wrap-name'>
                 <div>
                     <span>{userName}</span>
-                    <button onClick={logout}>登出</button>          
+                    <button onClick={logout}>登出</button>
+                    <button onClick={sendMessage}>測試</button>          
                     <p>id : {account}</p>
                     <input type="text" placeholder='輸入好友id' onChange={changeFriendId} value={friendId} />
                     <button onClick={addFriend}>加入好友</button>
@@ -94,7 +100,7 @@ const List = () => {
             </div>
             <div className='list-wrap-message'>
                 {
-                    message.map(item => <MessageLink key={ v4() }/>)
+                    messageContainer.map(item => <MessageLink key={ v4() } onClick={() => changeRoomName(item.roomName)}  messageContainer={item} />)
                 }
             </div>
         </div>

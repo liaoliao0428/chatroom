@@ -17,7 +17,7 @@ const Signup = () => {
     
     // 建立帳號
     const signup = async () => {
-        const url = `${URL}/login/signup`
+        const url = `${URL}/user/signup`
         const { data } = await axios.post(url , {
             'userName': userName,
             'account': account,
