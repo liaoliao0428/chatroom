@@ -17,7 +17,7 @@ const Signin = () => {
 
     // 登入
     const signin = async () => {
-        const url = `${URL}/login/signin`
+        const url = `${URL}/user/signin`
         const { data } = await axios.post(url , {
             'account': account,
             'password': password

@@ -4,12 +4,14 @@ import React from 'react';
 import MessageLeft from './MessageLeft';
 import MessageRight from './MessageRight';
 
-const Chat = () => {
+const Chat = ( props ) => {
+    const { roomName } = props
+
     return (
         <div className='chat-wrap'>
             <div className='chat-wrap-main'>
                 <div className='send-name-wrap'>
-                    <span>傳給誰</span>
+                    <span>{roomName}</span>
                 </div>
                 <div className='message-wrap'>
                     <MessageLeft />
