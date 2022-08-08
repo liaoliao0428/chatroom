@@ -1,7 +1,7 @@
 import { useState , useEffect } from 'react';
 
 // 第三方套件
-import { Link , useNavigate } from 'react-router-dom'
+import { Link , useNavigate , useParams } from 'react-router-dom'
 import axios from 'axios';
 import Cookies from 'js-cookie'
 import { v4 } from 'uuid';
@@ -35,12 +35,14 @@ const ChatRoom = () => {
     useEffect(() => {
         // 如果user有值 socket連線
         if(user){
-            //開啟
-            setWs(io.connect('http://localhost:3002' , {
-                query: {
-                    'account': user.account
-                }
-            }))
+            if ( !ws.connected ) {
+                //開啟
+                setWs(io.connect('http://localhost:3002' , {
+                    query: {
+                        'account': user.account
+                    }
+                }))
+            }
         }
     } , [ user ])
 
@@ -55,9 +57,16 @@ const ChatRoom = () => {
     },[ ws ])
 
     const initWebSocket = () => {
+        console.log('socket啟動');
+        // 123
         //對 getMessage 設定監聽，如果 server 有透過 getMessage 傳送訊息，將會在此被捕捉
         ws.on('getMessage', message => {
             console.log(message)
+        })
+
+        // Server 通知完後再傳送 disConnection 通知關閉連線
+        ws.on('disConnection', () => {
+            ws.close()
         })
     }
     // --------------------------------------------------- 連線 ------------------------------------------------------------------------
@@ -81,7 +90,7 @@ const ChatRoom = () => {
         <div className='chatRoom-wrap'>
             <List user={ user } ws={ ws } setRoomName={ setRoomName }/>
             <Routes>
-                <Route path='/:roomId' element={<Chat roomName={roomName}/>}/>
+                <Route path='/:roomId' element={<Chat roomName={roomName} ws={ ws } user={user}/>}/>
             </Routes>
         </div>
     );
