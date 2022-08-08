@@ -1,7 +1,7 @@
 import { useState , useEffect } from 'react';
 
 // 第三方套件
-import { Link , useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
 import Cookies from 'js-cookie'
 import { v4 } from 'uuid';
@@ -24,6 +24,9 @@ const List = ( props ) => {
         getMessageContainer()
     } , [])
 
+    useEffect(() => {
+    } , [messageContainer])
+
     // 加入好友
     const addFriend = async () => {
         const accessToken = Cookies.get('accessToken')
@@ -39,7 +42,7 @@ const List = ( props ) => {
 
         if ( data.addFriend ) {
             setFriendId('')
-            // getMessageContainer()
+            getMessageContainer()
         }else{
             alert(data.addFriendResponse)
         }
@@ -48,6 +51,7 @@ const List = ( props ) => {
     // 登出
     const logout = () => {
         Cookies.remove('accessToken'); // 清除accseeToken
+        ws.emit('disConnection', 'XXX')
         history('/login')
     }
 
@@ -78,7 +82,7 @@ const List = ( props ) => {
     }
     // --------------------------------------------------- 連線 ------------------------------------------------------------------------
 
-    // 點擊溝改聊天室名稱
+    // 點擊更改聊天室名稱
     const changeRoomName = (roomName) => {
         setRoomName(roomName)
     }
