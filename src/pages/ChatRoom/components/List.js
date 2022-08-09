@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
 import Cookies from 'js-cookie'
 import { v4 } from 'uuid';
-import { io } from 'socket.io-client'
  
 // URL
 import { URL } from '../../../global/url'
@@ -14,9 +13,9 @@ import { URL } from '../../../global/url'
 import MessageLink from './MessageLink';
 
 const List = ( props ) => {
-    const history = useNavigate();
     const { userName , account } = props.user
     const { ws , setRoomName } = props
+    const history = useNavigate();
     const [ friendId , setFriendId ] = useState('')
     const [ messageContainer , setMessageContainer ] = useState([])
 
