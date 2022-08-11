@@ -14,7 +14,7 @@ import MessageLink from './MessageLink';
 
 const List = ( props ) => {
     const { userName , account } = props.user
-    const { ws , setRoomName } = props
+    const { ws } = props
     const history = useNavigate();
     const [ friendId , setFriendId ] = useState('')
     const [ messageContainer , setMessageContainer ] = useState([])
@@ -22,9 +22,6 @@ const List = ( props ) => {
     useEffect(() => {
         getMessageContainer()
     } , [])
-
-    useEffect(() => {
-    } , [messageContainer])
 
     // 加入好友
     const addFriend = async () => {
@@ -81,11 +78,6 @@ const List = ( props ) => {
     }
     // --------------------------------------------------- 連線 ------------------------------------------------------------------------
 
-    // 點擊更改聊天室名稱
-    const changeRoomName = (roomName) => {
-        setRoomName(roomName)
-    }
-
     return (
         <div className='list-wrap'>
             <div className='list-wrap-name'>
@@ -103,7 +95,7 @@ const List = ( props ) => {
             </div>
             <div className='list-wrap-message'>
                 {
-                    messageContainer.map(item => <MessageLink key={ v4() } onClick={() => changeRoomName(item.roomName)}  messageContainer={item} />)
+                    messageContainer.map(item => <MessageLink key={ v4() } messageContainer={item} />)
                 }
             </div>
         </div>
