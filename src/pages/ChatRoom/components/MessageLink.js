@@ -20,7 +20,7 @@ const MessageLink = ( props ) => {
     }
 
     return (
-        <Link to={`/chat/${roomId}`} onClick={props.onClick}>
+        <Link to={`/chat/${roomId}`} >
             <div className='message-preview'>
                 <span>{roomName}</span>
                 <p>{message}</p>

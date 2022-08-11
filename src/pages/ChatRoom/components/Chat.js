@@ -14,22 +14,68 @@ import MessageLeft from './MessageLeft';
 import MessageRight from './MessageRight';
 
 const Chat = ( props ) => {
-    const { account } = props.user
     const { ws } = props
     const history = useNavigate();
     const { roomId } = useParams()
+    const [ account , setAccount ] = useState('')
     const [ message , setMessage ] = useState('')
     const [ messageArray , setMessageArray ] = useState([])
     const [ roomName , setRoomName ] = useState('')
+    const [ ckeckMessageId , setCheckMessageId ] = useState('')
+    const [ readCheck , seReadCheck ] = useState('')
+    const [ unReadIds , setUnReadIds ] = useState([])
+    const [ unReadIdCkeck , setUnReadIdCheck ] = useState('')
     const messageRef = useRef()
     const chatWrapRef = useRef()
 
-    // 滾輪滾到最底
+    // 一點進來把所有訊息改成已讀狀態
     useEffect(() => {
-        const current = chatWrapRef.current
-        //scrollHeight是頁面的高度
-        current.scrollTop = current.scrollHeight
-      }, [ messageArray ])
+        if (unReadIds.length != 0) {
+            // 把所有的訊息都標示已讀
+            const updateAllReadCheckData = {
+                roomId: roomId,
+                unReadIds: unReadIds
+            }
+
+            setTimeout(() => {
+                ws.emit('updateAllReadCheck' , updateAllReadCheckData)
+
+            } , 200)
+
+            unReadIds.forEach((unReadId) => {
+                // 取得要標記為已讀的index
+                const checkIndex = messageArray.map((item) => {
+                    return item.id
+                }).indexOf(unReadId.id)
+
+                // 將messageArray指定的狀態改為以讀
+                messageArray[checkIndex].status = true
+            })
+
+            seReadCheck((prev) => {
+                return prev + 1
+            })
+            setUnReadIds([])
+        }
+    } , [ unReadIdCkeck ])
+
+    // 已讀rerender
+    useEffect(() => {
+        if (ckeckMessageId) {
+            // 取得要標記為已讀的index
+            const checkIndex = messageArray.map((item) => {
+                return item.id
+            }).indexOf(ckeckMessageId)
+
+            // 將messageArray指定的狀態改為以讀
+            messageArray[checkIndex].status = true
+            seReadCheck((prev) => {
+                return prev + 1
+            })
+            setUnReadIds([])
+        }        
+
+    } , [ ckeckMessageId ])    
 
     // 網址更新就撈一次新的資料
     useEffect(() => {
@@ -40,12 +86,12 @@ const Chat = ( props ) => {
         if (roomId) {
             setTimeout(() => {
                 getRoomNameMessage()
-                getMessageHistory()
-            }, 100) 
+            }, 200) 
         }    
 
         // 將原本的訊息陣列清除
         setMessageArray([])
+        setUnReadIds([])
 
     } , [ history ])
 
@@ -53,20 +99,67 @@ const Chat = ( props ) => {
     useEffect(() => {
         if (ws) {
             initWebSocket()
+            const initReadCheckData = {
+                roomId: roomId
+            }
+            ws.emit('initReadCheck' , initReadCheckData)
         }                 
-    } , [ ws ])
+    } , [ ws , history])
 
     // 設定socket事件的監聽
     const initWebSocket = () => {
+        // 先將舊的監聽事件關閉 避免造成監聽推積
+        ws.off('sendMessageResponse')
+        ws.off('readCheck')
+        ws.off('readCheckYes')
+        ws.off('initReadCheck')
+
         // 收到傳送訊息的回傳事件
         ws.on('sendMessageResponse' , messageResponse => {
-            setMessageArray((prev) => {
-                return [...prev , {
-                    'from': messageResponse.from,
-                    'message': messageResponse.message,
-                    'time': messageResponse.time
-                }]
-            })
+            if (messageResponse.roomId === roomId) {
+                const id = messageResponse.messageData.id
+                setUnReadIds((prev) => {
+                    return [...prev , {
+                        id
+                    }]
+                })
+
+                setMessageArray((prev) => {
+                    return [...prev , {
+                        'id': messageResponse.messageData.id,
+                        'from': messageResponse.messageData.from,
+                        'message': messageResponse.messageData.message,
+                        'status': messageResponse.messageData.status,
+                        'time': messageResponse.messageData.time
+                    }]
+                })
+            }            
+        })
+
+        // 被詢問是否已讀
+        ws.on('readCheck' , readCheckData => {
+            // 如果傳送訊息的roomId跟當前的房間的roomId一樣 標註為已讀
+            if (readCheckData.roomId === roomId) {
+                ws.emit('readCheckYes' , readCheckData)
+            }
+        })
+
+        // 已讀確認
+        ws.on('readCheckYes' , readCheckData => {
+            // 如果傳送訊息的roomId跟當前的房間的roomId一樣 標註為被已讀
+            if (readCheckData.roomId === roomId) {
+                setCheckMessageId(readCheckData.checkId)
+            }
+        })
+
+        // 剛點進來的已讀確認
+        ws.on('initReadCheck' , initReadCheckRoomId => {
+            // 如果傳送訊息的roomId跟當前的房間的roomId一樣 標註為被已讀
+            if (initReadCheckRoomId === roomId) {
+                setUnReadIdCheck(prev => {
+                    return prev+1
+                })
+            }
         })
     }
 
@@ -78,9 +171,13 @@ const Chat = ( props ) => {
             'message': message
         }
 
-        if (message) {
+        // 訊息欄位不為空 socket.emit傳送訊息
+        if ( message ) {
 
+            // socket傳送訊息事件
             ws.emit('sendMessage', messageData)
+
+            // 訊息欄位清空
             setMessage('')
 
             // focus到訊息input上面
@@ -102,15 +199,11 @@ const Chat = ( props ) => {
             }
         })
 
-        if (data) {
+        if ( data ) {
+            setAccount(data.account)
             setRoomName(data.roomName)
             setMessageArray(data.messageHistory)
         }
-    }
-
-    // 取得聊天室歷史訊息
-    const getMessageHistory = () => {
-        ws.emit('getMessageHistory',12354354)
     }
 
     // focus到訊息input上面
@@ -130,6 +223,13 @@ const Chat = ( props ) => {
             sendMessage()
         }
     }
+
+    // 滾輪滾到最底
+    useEffect(() => {
+        const current = chatWrapRef.current
+        //scrollHeight是頁面的高度
+        current.scrollTop = current.scrollHeight
+    }, [ messageArray ])
 
     return (
         <div className='chat-wrap'>

@@ -1,10 +1,8 @@
 import { useState , useEffect } from 'react';
 
 // 第三方套件
-import { Link , useNavigate , useParams } from 'react-router-dom'
 import axios from 'axios';
 import Cookies from 'js-cookie'
-import { v4 } from 'uuid';
 import { io } from 'socket.io-client'
 
 // URL
@@ -23,52 +21,11 @@ import Chat from './components/Chat';
 const ChatRoom = () => {
     const [ user , setUser ] = useState('')
     const [ ws , setWs ] = useState('')
-    const [ roomName , setRoomName ] = useState('')
 
     // 取得使用者資料
     useEffect(() => {
         getUserData()
     } , [])
-
-    // --------------------------------------------------- 連線 ------------------------------------------------------------------------
-    // socket連線
-    useEffect(() => {
-        // 如果user有值 socket連線
-        if(user){
-            if ( !ws.connected ) {
-                //開啟
-                setWs(io.connect('http://localhost:3002' , {
-                    query: {
-                        'account': user.account
-                    }
-                }))
-            }
-        }
-    } , [ user ])
-
-    // 連線成功設定監聽
-    useEffect(()=>{
-        if(ws){
-            //連線成功在 console 中打印訊息
-            console.log('success connect!')
-            //設定監聽
-            initWebSocket()
-        }
-    },[ ws ])
-
-    const initWebSocket = () => {
-        console.log('socket啟動');
-        //對 getMessage 設定監聽，如果 server 有透過 getMessage 傳送訊息，將會在此被捕捉
-        ws.on('getMessage', message => {
-            console.log(message)
-        })
-
-        // Server 通知完後再傳送 disConnection 通知關閉連線
-        ws.on('disConnection', () => {
-            ws.close()
-        })
-    }
-    // --------------------------------------------------- 連線 ------------------------------------------------------------------------
 
     // 撈使用者訊息
     const getUserData = async () => {
@@ -85,11 +42,46 @@ const ChatRoom = () => {
         }
     }
 
+    // --------------------------------------------------- 連線 ------------------------------------------------------------------------
+    // socket連線
+    useEffect(() => {
+        // 如果user有值 socket連線
+        if( user && !ws.connected ){
+            //開啟
+            setWs(io.connect('http://localhost:3002' , {
+                query: {
+                    'account': user.account
+                }
+            }))
+        }
+    } , [ user ])
+
+    // 連線成功設定監聽
+    useEffect(()=>{
+        if( ws ){
+            // 連線成功在 console 中打印訊息
+            console.log('success connect!')
+            // 設定socket監聽
+            initWebSocket()
+        }
+    },[ ws ])
+
+    // 設定socket監聽
+    const initWebSocket = () => {
+        console.log('socket啟動');
+
+        // Server 通知完後再傳送 disConnection 通知關閉連線
+        ws.on('disConnection', () => {
+            ws.close()
+        })
+    }
+    // --------------------------------------------------- 連線 ------------------------------------------------------------------------
+
     return (
         <div className='chatRoom-wrap'>
-            <List user={ user } ws={ ws } setRoomName={ setRoomName }/>
+            <List user={ user } ws={ ws } />
             <Routes>
-                <Route path='/:roomId' element={<Chat roomName={roomName} ws={ ws } user={user}/>}/>
+                <Route path='/:roomId' element={<Chat ws={ ws } />}/>
             </Routes>
         </div>
     );
