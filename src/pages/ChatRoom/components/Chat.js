@@ -22,42 +22,32 @@ const Chat = ( props ) => {
     const [ messageArray , setMessageArray ] = useState([])
     const [ roomName , setRoomName ] = useState('')
     const [ ckeckMessageId , setCheckMessageId ] = useState('')
-    const [ readCheck , seReadCheck ] = useState('')
-    const [ unReadIds , setUnReadIds ] = useState([])
-    const [ unReadIdCkeck , setUnReadIdCheck ] = useState('')
+    const [ readCheck , setReadCheck ] = useState('')
+    const [ initUnReadIds , setInitUnReadIds ] = useState('')
     const messageRef = useRef()
     const chatWrapRef = useRef()
 
     // 一點進來把所有訊息改成已讀狀態
     useEffect(() => {
-        if (unReadIds.length != 0) {
-            // 把所有的訊息都標示已讀
-            const updateAllReadCheckData = {
-                roomId: roomId,
-                unReadIds: unReadIds
-            }
-
-            setTimeout(() => {
-                ws.emit('updateAllReadCheck' , updateAllReadCheckData)
-
-            } , 200)
-
-            unReadIds.forEach((unReadId) => {
+        if (initUnReadIds) {
+            initUnReadIds.forEach((initUnReadId) => {
                 // 取得要標記為已讀的index
                 const checkIndex = messageArray.map((item) => {
                     return item.id
-                }).indexOf(unReadId.id)
-
+                }).indexOf(initUnReadId.message.id)
+    
                 // 將messageArray指定的狀態改為以讀
                 messageArray[checkIndex].status = true
+
+                setReadCheck((prev) => {
+                    return prev + 1
+                })
             })
 
-            seReadCheck((prev) => {
-                return prev + 1
-            })
-            setUnReadIds([])
+            setInitUnReadIds('')
         }
-    } , [ unReadIdCkeck ])
+
+    } , [ initUnReadIds ])
 
     // 已讀rerender
     useEffect(() => {
@@ -69,10 +59,9 @@ const Chat = ( props ) => {
 
             // 將messageArray指定的狀態改為以讀
             messageArray[checkIndex].status = true
-            seReadCheck((prev) => {
+            setReadCheck((prev) => {
                 return prev + 1
             })
-            setUnReadIds([])
         }        
 
     } , [ ckeckMessageId ])    
@@ -84,23 +73,21 @@ const Chat = ( props ) => {
 
         // 取得房間名稱
         if (roomId) {
-            setTimeout(() => {
-                getRoomNameMessage()
-            }, 200) 
+            getRoomNameMessage()
         }    
 
         // 將原本的訊息陣列清除
         setMessageArray([])
-        setUnReadIds([])
 
     } , [ history ])
 
-    // ws有值設定socket事件的監聽
+    // ws有值設定socket事件的監聽、並已讀全部未讀訊息
     useEffect(() => {
         if (ws) {
             initWebSocket()
             const initReadCheckData = {
-                roomId: roomId
+                roomId: roomId,
+                account: account
             }
             ws.emit('initReadCheck' , initReadCheckData)
         }                 
@@ -117,13 +104,6 @@ const Chat = ( props ) => {
         // 收到傳送訊息的回傳事件
         ws.on('sendMessageResponse' , messageResponse => {
             if (messageResponse.roomId === roomId) {
-                const id = messageResponse.messageData.id
-                setUnReadIds((prev) => {
-                    return [...prev , {
-                        id
-                    }]
-                })
-
                 setMessageArray((prev) => {
                     return [...prev , {
                         'id': messageResponse.messageData.id,
@@ -153,12 +133,10 @@ const Chat = ( props ) => {
         })
 
         // 剛點進來的已讀確認
-        ws.on('initReadCheck' , initReadCheckRoomId => {
+        ws.on('initReadCheck' , initReadCheckData => {
             // 如果傳送訊息的roomId跟當前的房間的roomId一樣 標註為被已讀
-            if (initReadCheckRoomId === roomId) {
-                setUnReadIdCheck(prev => {
-                    return prev+1
-                })
+            if (initReadCheckData.roomId === roomId) {
+                setInitUnReadIds(initReadCheckData.unReadIds)
             }
         })
     }
