@@ -27,7 +27,7 @@ const MessageLink = ( props ) => {
             </div>
             <div className='message-status'>
                 <span>{updateTime}</span>
-                <p className={readCountClass}>{unRead}</p>
+                {/* <p className={readCountClass}>{unRead}</p> */}
             </div>                    
         </Link>
     );
